@@ -15,8 +15,18 @@
 I've created folders for you:
 ```
 training_data/
-├── human/     ← Put HUMAN voice MP3s here
-└── ai/        ← Put AI-GENERATED voice MP3s here
+├── Human/         ← Put HUMAN voice MP3s here (organized by language)
+│   ├── English/
+│   ├── Tamil/
+│   ├── Malayalam/
+│   ├── Hindi/
+│   └── Telugu/
+└── AI_Generated/  ← Put AI-GENERATED voice MP3s here (organized by language)
+    ├── English/
+    ├── Tamil/
+    ├── Malayalam/
+    ├── Hindi/
+    └── Telugu/
 ```
 
 **You need:**
@@ -33,7 +43,7 @@ training_data/
 1. Use Windows Voice Recorder
 2. Record different people speaking
 3. Save each as separate MP3
-4. Copy to: training_data/human/
+4. Copy to: training_data/Human/{Language}/ (e.g., training_data/Human/English/)
 ```
 
 **Tips:**
@@ -60,7 +70,7 @@ training_data/
 - Type different texts
 - Try different voices
 - Download as MP3
-- Save to: `training_data/ai/`
+- Save to: training_data/AI_Generated/{Language}/ (e.g., training_data/AI_Generated/English/)
 
 **2. Google Cloud TTS**
 - https://cloud.google.com/text-to-speech
@@ -86,20 +96,22 @@ training_data/
 
 ```
 training_data/
-├── human/
-│   ├── person1_english.mp3
-│   ├── person2_tamil.mp3
-│   ├── person3_hindi.mp3
-│   ├── recording1.mp3
-│   ├── recording2.mp3
-│   └── ... (50+ files)
-└── ai/
-    ├── ttsmaker_voice1.mp3
-    ├── ttsmaker_voice2.mp3
-    ├── google_tts_1.mp3
-    ├── amazon_polly_1.mp3
-    ├── azure_tts_1.mp3
-    └── ... (50+ files)
+├── Human/
+│   ├── English/
+│   │   ├── person1_en.mp3
+│   │   └── ...
+│   ├── Tamil/
+│   │   ├── person2_ta.mp3
+│   │   └── ...
+│   └── ...
+└── AI_Generated/
+    ├── English/
+    │   ├── tts_en_1.mp3
+    │   └── ...
+    ├── Tamil/
+    │   ├── tts_ta_1.mp3
+    │   └── ...
+    └── ...
 ```
 
 **File Naming Tips:**

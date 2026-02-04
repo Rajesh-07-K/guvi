@@ -13,11 +13,19 @@ def setup_folders():
     print("Setting up training folders")
     print("=" * 70)
     
+    languages = ["English", "Tamil", "Malayalam", "Hindi", "Telugu"]
+    
+    # Root folders
     folders = [
         "training_data",
-        "training_data/human",
-        "training_data/ai"
+        "training_data/Human",
+        "training_data/AI_Generated"
     ]
+    
+    # Language folders
+    for lang in languages:
+        folders.append(f"training_data/Human/{lang}")
+        folders.append(f"training_data/AI_Generated/{lang}")
     
     for folder in folders:
         if not os.path.exists(folder):
@@ -32,11 +40,18 @@ def setup_folders():
 def count_files():
     """Count files in each folder."""
     
-    human_path = "training_data/human"
-    ai_path = "training_data/ai"
+    human_root = "training_data/Human"
+    ai_root = "training_data/AI_Generated"
     
-    human_files = len([f for f in os.listdir(human_path) if f.endswith('.mp3')]) if os.path.exists(human_path) else 0
-    ai_files = len([f for f in os.listdir(ai_path) if f.endswith('.mp3')]) if os.path.exists(ai_path) else 0
+    human_files = 0
+    if os.path.exists(human_root):
+        for root, dirs, files in os.walk(human_root):
+            human_files += len([f for f in files if f.endswith('.mp3')])
+            
+    ai_files = 0
+    if os.path.exists(ai_root):
+        for root, dirs, files in os.walk(ai_root):
+            ai_files += len([f for f in files if f.endswith('.mp3')])
     
     print("\n" + "=" * 70)
     print("Current Dataset Status")
@@ -48,8 +63,8 @@ def count_files():
     if human_files == 0 and ai_files == 0:
         print("\nNo training data yet!")
         print("\nNext steps:")
-        print("   1. Add human voice MP3s to: training_data/human/")
-        print("   2. Add AI voice MP3s to: training_data/ai/")
+        print("   1. Add human voice MP3s to: training_data/Human/{Language}/")
+        print("   2. Add AI voice MP3s to: training_data/AI_Generated/{Language}/")
         print("   3. Run: python train_model.py")
     elif human_files < 20 or ai_files < 20:
         print("\nDataset is too small!")
@@ -70,45 +85,28 @@ def show_instructions():
     print("How to Collect Training Data")
     print("=" * 70)
     
-    print("\nHUMAN VOICES (training_data/human/):")
+    print("\nHUMAN VOICES (training_data/Human/):")
     print("   1. Record yourself and friends/family")
+    print("      - Organize by language subfolders")
     print("      - Windows: Use 'Voice Recorder' app")
     print("      - Record 10-30 second clips")
     print("   ")
     print("   2. Download from LibriVox (free audiobooks)")
     print("      - Visit: https://librivox.org/")
-    print("      - Download MP3 files")
-    print("      - Cut into 30-second clips if needed")
+    print("      - Download MP3 files and place in language folders")
     print("   ")
-    print("   3. Or use Common Voice dataset")
-    print("      - Visit: https://commonvoice.mozilla.org/")
     
-    print("\nAI VOICES (training_data/ai/):")
+    print("\nAI VOICES (training_data/AI_Generated/):")
     print("   1. TTSMaker (Easiest!)")
     print("      - Visit: https://ttsmaker.com/")
-    print("      - Type different texts")
-    print("      - Try different voices")
-    print("      - Download as MP3")
+    print("      - Choose language and generate voices")
+    print("      - Download and place in language subfolders")
     print("   ")
-    print("   2. NaturalReaders")
-    print("      - Visit: https://www.naturalreaders.com/online/")
-    print("      - Generate voices")
-    print("   ")
-    print("   3. Google Cloud TTS")
-    print("      - Visit: https://cloud.google.com/text-to-speech")
-    print("   ")
-    print("   4. Use MULTIPLE TTS systems for better results!")
     
     print("\nRECOMMENDED:")
     print("   - Minimum: 50 human + 50 AI voices")
-    print("   - Good: 100 human + 100 AI voices")
     print("   - Best: 200+ human + 200+ AI voices")
-    
-    print("\nFile Requirements:")
-    print("   - Format: MP3 only")
-    print("   - Length: 5-30 seconds ideal")
-    print("   - Quality: Clear audio, no noise")
-    print("   - Diversity: Different speakers, languages, TTS systems")
+    print("   - Make sure all languages are represented!")
 
 
 def main():
@@ -138,7 +136,7 @@ def main():
         print("\n   Run: python train_model.py")
     else:
         print("\nCollect more audio files:")
-        print("   1. Add MP3 files to training_data/human/ and training_data/ai/")
+        print("   1. Add MP3 files to language subfolders in training_data/Human/ and training_data/AI_Generated/")
         print("   2. Run this script again to check: python quick_dataset_setup.py")
         print("   3. When ready, train: python train_model.py")
     

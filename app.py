@@ -5,10 +5,11 @@ Detects whether a voice recording is AI-generated or spoken by a human.
 
 from fastapi import FastAPI, Header, HTTPException, status
 from pydantic import BaseModel, Field, validator
-from typing import Literal
+from typing import Literal, Optional
 import base64
 from feature_extractor import AudioFeatureExtractor
 from model import VoiceClassifier
+from language_detector import LanguageDetector
 import logging
 
 # Configure logging
@@ -31,14 +32,28 @@ API_KEY = "YOUR_SECRET_API_KEY"
 # Initialize feature extractor and classifier
 feature_extractor = AudioFeatureExtractor()
 classifier = VoiceClassifier()
+language_detector = LanguageDetector()
+
+# Load models immediately on module import
+logger.info("Loading voice classifier...")
+if not classifier.load_model():
+    logger.warning("No pre-trained voice model found. Initializing with synthetic data...")
+    classifier._load_pretrained_model()
+
+logger.info("Loading language detector...")
+if not language_detector.load_model():
+    logger.warning("No pre-trained language model found. Initializing with synthetic data...")
+    language_detector.initialize_with_synthetic_data()
+
+logger.info("✅ All models loaded successfully!")
 
 
 # Request Model
 class VoiceDetectionRequest(BaseModel):
     """Request schema for voice detection."""
-    language: Literal["Tamil", "English", "Hindi", "Malayalam", "Telugu"] = Field(
-        ..., 
-        description="Language of the audio recording"
+    language: Optional[Literal["Tamil", "English", "Hindi", "Malayalam", "Telugu"]] = Field(
+        None, 
+        description="Language of the audio recording (optional - will be auto-detected if not provided)"
     )
     audioFormat: Literal["mp3"] = Field(
         ..., 
@@ -140,9 +155,26 @@ async def detect_voice(
                 detail="Decoded audio is empty"
             )
         
-        logger.info(f"Processing {request.language} audio ({len(audio_bytes)} bytes)")
+        # Step 3: Detect language (if not provided)
+        detected_language = request.language
+        language_confidence = 1.0
         
-        # Step 3: Extract features (NO audio modification)
+        if detected_language is None:
+            try:
+                detected_language, language_confidence = language_detector.predict(audio_bytes)
+                logger.info(f"Auto-detected language: {detected_language} (confidence: {language_confidence:.2f})")
+            except Exception as e:
+                logger.error(f"Language detection failed: {str(e)}")
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail=f"Language detection failed: {str(e)}"
+                )
+        else:
+            logger.info(f"Using provided language: {detected_language}")
+        
+        logger.info(f"Processing {detected_language} audio ({len(audio_bytes)} bytes)")
+        
+        # Step 4: Extract features (NO audio modification)
         try:
             features = feature_extractor.get_feature_vector(audio_bytes)
         except Exception as e:
@@ -152,7 +184,7 @@ async def detect_voice(
                 detail=f"Failed to extract features from audio: {str(e)}"
             )
         
-        # Step 4: Classify using ML model
+        # Step 5: Classify using ML model
         try:
             classification, confidence_score, explanation = classifier.predict(features)
         except Exception as e:
@@ -162,12 +194,12 @@ async def detect_voice(
                 detail="Classification failed"
             )
         
-        # Step 5: Return response
+        # Step 6: Return response
         logger.info(f"Result: {classification} ({confidence_score:.2f})")
         
         return VoiceDetectionResponse(
             status="success",
-            language=request.language,
+            language=detected_language,
             classification=classification,
             confidenceScore=round(confidence_score, 4),
             explanation=explanation
@@ -221,12 +253,6 @@ async def validation_exception_handler(request, exc):
 
 if __name__ == "__main__":
     import uvicorn
-    
-    # Load or initialize model on startup
-    logger.info("Initializing voice classifier...")
-    if not classifier.load_model():
-        logger.warning("No pre-trained model found. Initializing with synthetic data...")
-        classifier._load_pretrained_model()
     
     # Run server
     uvicorn.run(

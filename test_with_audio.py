@@ -1,6 +1,7 @@
 """
 Easy Audio Tester - Test the API with your MP3 files
 Usage: python test_with_audio.py [language] [audio_file.mp3]
+       python test_with_audio.py [audio_file.mp3]  (auto-detect language)
 """
 
 import requests
@@ -9,27 +10,28 @@ import sys
 import os
 
 
-def test_with_audio(audio_file="sample.mp3", language="English"):
+def test_with_audio(audio_file="sample.mp3", language=None):
     """
     Test the API with an audio file.
     
     Args:
         audio_file: Path to MP3 file (default: sample.mp3)
-        language: Language of audio (Tamil, English, Hindi, Malayalam, Telugu)
+        language: Language of audio (Tamil, English, Hindi, Malayalam, Telugu) - Optional, will be auto-detected
     """
     
     # API configuration
     API_URL = "http://localhost:8000/api/voice-detection"
     API_KEY = "YOUR_SECRET_API_KEY"
     
-    # Normalize language input
-    language = language.capitalize()
-    valid_languages = ["Tamil", "English", "Hindi", "Malayalam", "Telugu"]
-    
-    if language not in valid_languages:
-        print(f"❌ Error: Invalid language '{language}'")
-        print(f"✅ Valid languages: {', '.join(valid_languages)}")
-        return
+    # Validate language if provided
+    if language is not None:
+        language = language.capitalize()
+        valid_languages = ["Tamil", "English", "Hindi", "Malayalam", "Telugu"]
+        
+        if language not in valid_languages:
+            print(f"❌ Error: Invalid language '{language}'")
+            print(f"✅ Valid languages: {', '.join(valid_languages)}")
+            return
     
     # Check if file exists
     if not os.path.exists(audio_file):
@@ -45,7 +47,7 @@ def test_with_audio(audio_file="sample.mp3", language="English"):
     print("🎤 AI Voice Detection - Audio Test")
     print("=" * 60)
     print(f"📁 Audio file: {audio_file}")
-    print(f"🗣️  Language: {language}")
+    print(f"🗣️  Language: {language if language else 'Auto-detect'}")
     
     try:
         # Read and encode audio file
@@ -63,10 +65,13 @@ def test_with_audio(audio_file="sample.mp3", language="English"):
         }
         
         payload = {
-            "language": language,
             "audioFormat": "mp3",
             "audioBase64": audio_base64
         }
+        
+        # Add language only if provided
+        if language is not None:
+            payload["language"] = language
         
         print(f"\n🚀 Sending request to API...")
         
@@ -82,6 +87,7 @@ def test_with_audio(audio_file="sample.mp3", language="English"):
             print("\n" + "=" * 60)
             print("✅ RESULT")
             print("=" * 60)
+            print(f"🌐 Detected Language: {result['language']}")
             print(f"🎯 Classification: {result['classification']}")
             print(f"📊 Confidence: {result['confidenceScore']*100:.2f}%")
             print(f"💬 Explanation: {result['explanation']}")
@@ -143,18 +149,22 @@ def show_help():
 
 USAGE:
     python test_with_audio.py [language] [audio_file.mp3]
+    python test_with_audio.py [audio_file.mp3]  (auto-detect language)
 
 EXAMPLES:
-    # Test with default file (sample.mp3) in English
+    # Test with default file (sample.mp3) - auto-detect language
     python test_with_audio.py
     
-    # Test with custom file in Tamil
+    # Test with custom file - auto-detect language
+    python test_with_audio.py my_voice.mp3
+    
+    # Test with custom file in Tamil (manual)
     python test_with_audio.py tamil my_voice.mp3
     
-    # Test with custom file in Hindi
+    # Test with custom file in Hindi (manual)
     python test_with_audio.py hindi recording.mp3
 
-SUPPORTED LANGUAGES:
+SUPPORTED LANGUAGES (Auto-Detection):
     - Tamil
     - English
     - Hindi

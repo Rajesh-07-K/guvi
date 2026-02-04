@@ -43,8 +43,8 @@ class VoiceDatasetTrainer:
         print("🎓 Voice Classifier Training")
         print("=" * 70)
         
-        human_path = os.path.join(dataset_path, "human")
-        ai_path = os.path.join(dataset_path, "ai")
+        human_path = os.path.join(dataset_path, "Human")
+        ai_path = os.path.join(dataset_path, "AI_Generated")
         
         # Check if folders exist
         if not os.path.exists(human_path):
@@ -87,11 +87,15 @@ class VoiceDatasetTrainer:
         return True
     
     def _load_from_folder(self, folder_path, label, voice_type):
-        """Load all MP3 files from a folder."""
+        """Load all MP3 files from a folder and its subfolders."""
         count = 0
         
-        # Get all MP3 files
-        mp3_files = [f for f in os.listdir(folder_path) if f.lower().endswith('.mp3')]
+        # Walk through the folder and subfolders
+        mp3_files = []
+        for root, dirs, files in os.walk(folder_path):
+            for file in files:
+                if file.lower().endswith('.mp3'):
+                    mp3_files.append(os.path.join(root, file))
         
         if len(mp3_files) == 0:
             print(f"   ⚠️  No MP3 files found in {folder_path}")
@@ -99,9 +103,8 @@ class VoiceDatasetTrainer:
         
         print(f"   Found {len(mp3_files)} MP3 files")
         
-        for filename in mp3_files:
-            filepath = os.path.join(folder_path, filename)
-            
+        for filepath in mp3_files:
+            filename = os.path.basename(filepath)
             try:
                 # Read audio file
                 with open(filepath, 'rb') as f:
