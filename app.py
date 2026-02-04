@@ -258,12 +258,15 @@ async def validation_exception_handler(request, exc):
 
 if __name__ == "__main__":
     import uvicorn
+    import os
+    
+    # Support dynamic port for cloud deployment (Render, Railway, etc.)
+    port = int(os.environ.get("PORT", 8000))
     
     # Run server
     uvicorn.run(
         "app:app",
         host="0.0.0.0",
-        port=8000,
-        reload=True,  # Development only
+        port=port,
         log_level="info"
     )
