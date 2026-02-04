@@ -192,12 +192,16 @@ if __name__ == "__main__":
         test_with_audio()
     
     elif len(sys.argv) == 2:
-        arg = sys.argv[1].lower()
-        if arg in ['help', '-h', '--help']:
+        arg = sys.argv[1]
+        arg_lower = arg.lower()
+        if arg_lower in ['help', '-h', '--help']:
             show_help()
+        elif arg_lower.endswith('.mp3'):
+            # It's an audio file
+            test_with_audio(audio_file=arg)
         else:
             # Assume it's a language
-            test_with_audio(language=sys.argv[1])
+            test_with_audio(language=arg)
     
     elif len(sys.argv) == 3:
         # Both language and file provided
