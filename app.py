@@ -7,6 +7,7 @@ from fastapi import FastAPI, Header, HTTPException, status
 from pydantic import BaseModel, Field, validator
 from typing import Literal, Optional
 import base64
+from fastapi.responses import JSONResponse
 from feature_extractor import AudioFeatureExtractor
 from model import VoiceClassifier
 from language_detector import LanguageDetector
@@ -245,10 +246,14 @@ async def root():
 @app.exception_handler(422)
 async def validation_exception_handler(request, exc):
     """Handle Pydantic validation errors."""
-    return {
-        "status": "error",
-        "message": "Invalid request format or malformed request"
-    }
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        content={
+            "status": "error",
+            "message": "Invalid request format or malformed request",
+            "detail": str(exc)
+        }
+    )
 
 
 if __name__ == "__main__":
