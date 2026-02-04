@@ -21,7 +21,7 @@ def test_with_audio(audio_file="sample.mp3", language=None):
     
     # API configuration
     API_URL = "http://localhost:8000/api/voice-detection"
-    API_KEY = "YOUR_SECRET_API_KEY"
+    API_KEY = "hackathon-ai-voice-12345"
     
     # Validate language if provided
     if language is not None:
@@ -58,9 +58,9 @@ def test_with_audio(audio_file="sample.mp3", language=None):
         file_size_kb = len(audio_bytes) / 1024
         print(f"📊 File size: {file_size_kb:.2f} KB")
         
-        # Prepare request
+        # Prepare request with Bearer token authentication
         headers = {
-            "x-api-key": API_KEY,
+            "Authorization": f"Bearer {API_KEY}",
             "Content-Type": "application/json"
         }
         

@@ -27,8 +27,9 @@ app = FastAPI(
 # Supported languages (strictly fixed)
 SUPPORTED_LANGUAGES = ["Tamil", "English", "Hindi", "Malayalam", "Telugu"]
 
-# API Key (In production, use environment variables or secret management)
-API_KEY = "YOUR_SECRET_API_KEY"
+# API Key for Hackathon (Bearer token format)
+# For hackathon endpoint tester, use: Authorization: Bearer <this-key>
+API_KEY = "hackathon-ai-voice-12345"
 
 # Initialize feature extractor and classifier
 feature_extractor = AudioFeatureExtractor()
@@ -90,18 +91,30 @@ class ErrorResponse(BaseModel):
     message: str
 
 
-def validate_api_key(x_api_key: str = Header(..., alias="x-api-key")) -> None:
+def validate_api_key(authorization: str = Header(...)) -> None:
     """
-    Validate API key from request header.
+    Validate API key from Authorization header (Bearer token format).
     
     Args:
-        x_api_key: API key from x-api-key header
+        authorization: Authorization header in format "Bearer <token>"
         
     Raises:
         HTTPException: If API key is invalid or missing
     """
-    if x_api_key != API_KEY:
-        logger.warning(f"Invalid API key attempt: {x_api_key[:10]}...")
+    # Check if Authorization header has Bearer format
+    if not authorization.startswith("Bearer "):
+        logger.warning("Missing or invalid Authorization header format")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authorization header format. Expected: Bearer <token>"
+        )
+    
+    # Extract token from "Bearer <token>"
+    token = authorization.replace("Bearer ", "", 1).strip()
+    
+    # Validate token
+    if token != API_KEY:
+        logger.warning(f"Invalid API key attempt: {token[:10]}...")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid API key"
@@ -119,12 +132,13 @@ def validate_api_key(x_api_key: str = Header(..., alias="x-api-key")) -> None:
 )
 async def detect_voice(
     request: VoiceDetectionRequest,
-    x_api_key: str = Header(..., alias="x-api-key")
+    authorization: str = Header(...)
 ) -> VoiceDetectionResponse:
     """
     Detect whether a voice recording is AI-generated or human.
     
-    **Authentication:** Requires valid API key in `x-api-key` header.
+    **Authentication:** Requires valid Bearer token in Authorization header.
+    **Format:** Authorization: Bearer <your-api-key>
     
     **Process:**
     1. Validate API key
@@ -136,8 +150,8 @@ async def detect_voice(
     **Important:** Audio is NOT modified (no resampling, no trimming).
     """
     try:
-        # Step 1: Validate API key
-        validate_api_key(x_api_key)
+        # Step 1: Validate API key (Bearer token)
+        validate_api_key(authorization)
         
         # Step 2: Decode Base64 audio safely
         try:

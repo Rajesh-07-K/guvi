@@ -6,7 +6,7 @@ Production-ready REST API to detect whether a voice recording is AI-generated or
 
 - **Language Support**: Tamil, English, Hindi, Malayalam, Telugu (language-agnostic model)
 - **Audio Format**: MP3 only (Base64 encoded)
-- **Authentication**: API key via `x-api-key` header
+- **Authentication**: Bearer Token via `Authorization` header
 - **ML Model**: Random Forest classifier with 18 acoustic features
 - **No Audio Modification**: Original audio preserved (no resampling/trimming)
 
@@ -32,7 +32,7 @@ Server runs on `http://0.0.0.0:8000`
 
 **Headers:**
 ```
-x-api-key: YOUR_SECRET_API_KEY
+Authorization: Bearer hackathon-ai-voice-12345
 Content-Type: application/json
 ```
 

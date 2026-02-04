@@ -9,16 +9,16 @@
 
 ---
 
-## 🔑 Step 1: Configure Your API Key
+
 
 ### Current Setup
 Your API key is defined in `app.py` line 31:
 ```python
-API_KEY = "YOUR_SECRET_API_KEY"
+API_KEY = "hackathon-ai-voice-12345"
 ```
 
 ### Option A: Keep the Default Key (Easiest)
-✅ **For the hackathon, you can keep using: `YOUR_SECRET_API_KEY`**
+✅ **For the hackathon, you can keep using: `hackathon-ai-voice-12345`**
 
 This is already set and working!
 
@@ -351,8 +351,8 @@ Once deployed, fill in the tester:
    ```
 
 2. **Authorization Header:**
-   - Header Name: `x-api-key`
-   - Header Value: `YOUR_SECRET_API_KEY` (or your custom key)
+   - Header Name: `Authorization`
+   - Header Value: `Bearer hackathon-ai-voice-12345` (or your custom key)
 
 3. **Test Message:**
    ```
@@ -395,7 +395,7 @@ Once deployed, fill in the tester:
 5. **Test deployed API**
 6. **Submit to hackathon endpoint tester** with:
    - Your deployed URL
-   - Your API key (x-api-key header)
+   - Your API key (Authorization: Bearer header)
    - Wait for validation ✅
 
 ---
