@@ -238,6 +238,48 @@ class LanguageDetector:
             print(f"[WARNING] Failed to load language model: {str(e)}")
             return False
 
+    def _create_synthetic_training_data(self) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Create synthetic training data for language detection.
+        This is a fallback when no pre-trained model exists.
+        
+        Returns:
+            Tuple of (X_train, y_train) where X_train is feature matrix
+            and y_train is language labels
+        """
+        np.random.seed(42)
+        
+        # Number of samples per language
+        n_samples_per_language = 40
+        n_languages = 5
+        n_features = 47  # Based on extract_language_features output
+        
+        X_train = []
+        y_train = []
+        
+        # Generate distinct feature patterns for each language
+        for lang_idx in range(n_languages):
+            for _ in range(n_samples_per_language):
+                # Base features with language-specific offsets
+                base_features = np.random.randn(n_features) * 0.5
+                
+                # Add language-specific patterns
+                if lang_idx == 0:  # English
+                    base_features[:10] += np.random.randn(10) * 0.3
+                elif lang_idx == 1:  # Tamil
+                    base_features[10:20] += np.random.randn(10) * 0.4
+                elif lang_idx == 2:  # Malayalam
+                    base_features[20:30] += np.random.randn(10) * 0.4
+                elif lang_idx == 3:  # Hindi
+                    base_features[30:40] += np.random.randn(10) * 0.3
+                elif lang_idx == 4:  # Telugu
+                    base_features[37:] += np.random.randn(10) * 0.4
+                
+                X_train.append(base_features)
+                y_train.append(lang_idx)
+        
+        return np.array(X_train), np.array(y_train)
+
     def initialize_with_synthetic_data(self):
         """Initialize classifier with synthetic training data."""
         print("[WARNING] No pre-trained language model found. Initializing with synthetic data...")
