@@ -1,12 +1,15 @@
 # Render.com Deployment Configuration
-# Copy this file to render.yaml (optional) or use web interface
 
 services:
   - type: web
     name: guvi-ai-voice-detection
     env: python
-    buildCommand: pip install -r requirements.txt
+    region: oregon
+    plan: free
+    buildCommand: pip install --upgrade pip setuptools wheel && pip install -r requirements.txt
     startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
+      - key: API_KEY
+        generateValue: true
