@@ -12,7 +12,7 @@ from feature_extractor import AudioFeatureExtractor
 from model import VoiceClassifier
 from language_detector import LanguageDetector
 import logging
-
+import os
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -29,8 +29,7 @@ SUPPORTED_LANGUAGES = ["Tamil", "English", "Hindi", "Malayalam", "Telugu"]
 
 # API Key for Hackathon (Bearer token format)
 # For hackathon endpoint tester, use: Authorization: Bearer <this-key>
-API_KEY = "hackathon-ai-voice-12345"
-
+API_KEY = os.getenv("API_KEY", "dev_key")
 # Initialize feature extractor and classifier
 feature_extractor = AudioFeatureExtractor()
 classifier = VoiceClassifier()
