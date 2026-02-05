@@ -231,136 +231,17 @@ class LanguageDetector:
                 with open('language_scaler.pkl', 'rb') as f:
                     self.scaler = pickle.load(f)
                 self.is_trained = True
-                print("✅ Language model loaded from disk")
+                print("[SUCCESS] Language model loaded from disk")
                 return True
             return False
         except Exception as e:
-            print(f"⚠️ Failed to load language model: {str(e)}")
+            print(f"[WARNING] Failed to load language model: {str(e)}")
             return False
-    
-    def _create_synthetic_training_data(self):
-        """
-        Create synthetic training data for language detection.
-        This is for demonstration - in production, use real labeled audio data.
-        
-        Language characteristics:
-        - English: Moderate pitch variance, high spectral centroid
-        - Tamil: Higher pitch variance (tonal), moderate tempo
-        - Malayalam: Similar to Tamil but different rhythm
-        - Hindi: Lower pitch variance, different spectral patterns
-        - Telugu: Tonal, higher pitch variance
-        """
-        np.random.seed(42)
-        samples_per_language = 200
-        n_features = 39  # Updated to match actual feature extraction
-        
-        X_train = []
-        y_train = []
-        
-        for lang_idx, lang_name in enumerate(self.LANGUAGES):
-            for _ in range(samples_per_language):
-                # Generate synthetic features with language-specific patterns
-                # Total features: 5 + 10 + 3 + 2 + 2 + 2 + 6 + 2 + 2 + 2 + 2 + 1 = 39
-                
-                if lang_name == "English":
-                    # English: Moderate pitch, high spectral centroid
-                    mfcc_overall = np.random.normal(0.2, 0.15, 5)  # 5 features
-                    mfcc_individual = np.random.normal(0.2, 0.15, 10)  # 10 features
-                    spectral_centroid = np.random.normal(3000, 500, 3)  # 3 features
-                    spectral_rolloff = np.random.normal(4000, 600, 2)  # 2 features
-                    spectral_bandwidth = np.random.normal(2500, 400, 2)  # 2 features
-                    spectral_contrast = np.random.normal(25, 5, 2)  # 2 features
-                    pitch_features = np.random.normal(150, 30, 6)  # 6 features
-                    zcr_features = np.random.normal(0.1, 0.02, 2)  # 2 features
-                    chroma_features = np.random.normal(0.3, 0.1, 2)  # 2 features
-                    mel_spec_features = np.random.normal(0.02, 0.01, 2)  # 2 features
-                    tonnetz_features = np.random.normal(0.1, 0.05, 2)  # 2 features
-                    tempo_feature = np.array([120 + np.random.normal(0, 10)])  # 1 feature
-                    
-                elif lang_name == "Tamil":
-                    # Tamil: Tonal, higher pitch variance
-                    mfcc_overall = np.random.normal(0.25, 0.2, 5)
-                    mfcc_individual = np.random.normal(0.25, 0.2, 10)
-                    spectral_centroid = np.random.normal(2800, 600, 3)
-                    spectral_rolloff = np.random.normal(3800, 650, 2)
-                    spectral_bandwidth = np.random.normal(2400, 450, 2)
-                    spectral_contrast = np.random.normal(27, 6, 2)
-                    pitch_features = np.random.normal(160, 50, 6)  # Higher variance
-                    zcr_features = np.random.normal(0.12, 0.025, 2)
-                    chroma_features = np.random.normal(0.32, 0.12, 2)
-                    mel_spec_features = np.random.normal(0.022, 0.012, 2)
-                    tonnetz_features = np.random.normal(0.12, 0.06, 2)
-                    tempo_feature = np.array([115 + np.random.normal(0, 12)])
-                    
-                elif lang_name == "Malayalam":
-                    # Malayalam: Similar to Tamil, different rhythm
-                    mfcc_overall = np.random.normal(0.23, 0.18, 5)
-                    mfcc_individual = np.random.normal(0.23, 0.18, 10)
-                    spectral_centroid = np.random.normal(2750, 550, 3)
-                    spectral_rolloff = np.random.normal(3750, 620, 2)
-                    spectral_bandwidth = np.random.normal(2350, 420, 2)
-                    spectral_contrast = np.random.normal(26, 5.5, 2)
-                    pitch_features = np.random.normal(155, 45, 6)
-                    zcr_features = np.random.normal(0.13, 0.023, 2)
-                    chroma_features = np.random.normal(0.31, 0.11, 2)
-                    mel_spec_features = np.random.normal(0.021, 0.011, 2)
-                    tonnetz_features = np.random.normal(0.13, 0.055, 2)
-                    tempo_feature = np.array([118 + np.random.normal(0, 11)])
-                    
-                elif lang_name == "Hindi":
-                    # Hindi: Lower pitch variance, distinct spectral pattern
-                    mfcc_overall = np.random.normal(0.18, 0.12, 5)
-                    mfcc_individual = np.random.normal(0.18, 0.12, 10)
-                    spectral_centroid = np.random.normal(2900, 450, 3)
-                    spectral_rolloff = np.random.normal(3900, 550, 2)
-                    spectral_bandwidth = np.random.normal(2450, 380, 2)
-                    spectral_contrast = np.random.normal(24, 4.5, 2)
-                    pitch_features = np.random.normal(145, 25, 6)  # Lower variance
-                    zcr_features = np.random.normal(0.09, 0.018, 2)
-                    chroma_features = np.random.normal(0.28, 0.09, 2)
-                    mel_spec_features = np.random.normal(0.019, 0.009, 2)
-                    tonnetz_features = np.random.normal(0.09, 0.04, 2)
-                    tempo_feature = np.array([122 + np.random.normal(0, 9)])
-                    
-                else:  # Telugu
-                    # Telugu: Tonal, high pitch variance
-                    mfcc_overall = np.random.normal(0.24, 0.19, 5)
-                    mfcc_individual = np.random.normal(0.24, 0.19, 10)
-                    spectral_centroid = np.random.normal(2850, 580, 3)
-                    spectral_rolloff = np.random.normal(3850, 640, 2)
-                    spectral_bandwidth = np.random.normal(2420, 440, 2)
-                    spectral_contrast = np.random.normal(26.5, 5.8, 2)
-                    pitch_features = np.random.normal(165, 48, 6)  # High variance
-                    zcr_features = np.random.normal(0.11, 0.024, 2)
-                    chroma_features = np.random.normal(0.33, 0.115, 2)
-                    mel_spec_features = np.random.normal(0.023, 0.0115, 2)
-                    tonnetz_features = np.random.normal(0.11, 0.057, 2)
-                    tempo_feature = np.array([117 + np.random.normal(0, 10.5)])
-                
-                features = np.concatenate([
-                    mfcc_overall,
-                    mfcc_individual,
-                    spectral_centroid,
-                    spectral_rolloff,
-                    spectral_bandwidth,
-                    spectral_contrast,
-                    pitch_features,
-                    zcr_features,
-                    chroma_features,
-                    mel_spec_features,
-                    tonnetz_features,
-                    tempo_feature
-                ])
-                
-                X_train.append(features)
-                y_train.append(lang_idx)
-        
-        return np.array(X_train), np.array(y_train)
-    
+
     def initialize_with_synthetic_data(self):
         """Initialize classifier with synthetic training data."""
-        print("⚠️ No pre-trained language model found. Initializing with synthetic data...")
-        print("📚 For production use, train with real labeled audio data!")
+        print("[WARNING] No pre-trained language model found. Initializing with synthetic data...")
+        print("[INFO] For production use, train with real labeled audio data!")
         
         X_train, y_train = self._create_synthetic_training_data()
         self.train(X_train, y_train)
